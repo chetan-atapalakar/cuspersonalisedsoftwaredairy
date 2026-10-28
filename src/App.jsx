@@ -805,4 +805,595 @@ function App() {
                       }
                     >
                       ···
+import React, { useState } from "react";
+import "./styles.css";
+
+const initialNotes = [
+  {
+    id: 1,
+    title: "Welcome to CüS",
+    text: "Your personal space for ideas, plans and progress.",
+    category: "Personal",
+  },
+  {
+    id: 2,
+    title: "Build something meaningful",
+    text: "Small improvements compound into extraordinary results.",
+    category: "Ideas",
+  },
+];
+
+function App() {
+  const [page, setPage] = useState("Overview");
+  const [notes, setNotes] = useState(initialNotes);
+  const [tasks, setTasks] = useState([
+    { id: 1, text: "Explore your new workspace", done: true },
+    { id: 2, text: "Create your first note", done: false },
+    { id: 3, text: "Plan tomorrow", done: false },
+  ]);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [showNote, setShowNote] = useState(false);
+  const [noteTitle, setNoteTitle] = useState("");
+  const [noteText, setNoteText] = useState("");
+  const [toast, setToast] = useState("");
+
+  const menu = [
+    { name: "Overview", icon: "◈" },
+    { name: "My Notes", icon: "▤" },
+    { name: "Tasks", icon: "✓" },
+    { name: "Calendar", icon: "▦" },
+    { name: "Messages", icon: "◌" },
+    { name: "AI Assistant", icon: "✳" },
+    { name: "Finance", icon: "↗" },
+    { name: "Settings", icon: "⚙" },
+  ];
+
+  function notify(text) {
+    setToast(text);
+    setTimeout(() => setToast(""), 2600);
+  }
+
+  function addNote(e) {
+    e.preventDefault();
+
+    if (!noteTitle.trim()) return;
+
+    setNotes([
+      {
+        id: Date.now(),
+        title: noteTitle,
+        text: noteText,
+        category: "Personal",
+      },
+      ...notes,
+    ]);
+
+    setNoteTitle("");
+    setNoteText("");
+    setShowNote(false);
+    notify("Note created successfully");
+  }
+
+  function toggleTask(id) {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id
+          ? { ...task, done: !task.done }
+          : task
+      )
+    );
+  }
+
+  function sendMessage(e) {
+    e.preventDefault();
+
+    if (!message.trim()) return;
+
+    const userMessage = message.trim();
+
+    setMessages([
+      ...messages,
+      { role: "You", text: userMessage },
+    ]);
+
+    setMessage("");
+
+    setTimeout(() => {
+      setMessages((previous) => [
+        ...previous,
+        {
+          role: "CüS",
+          text:
+            "I'm your CüS assistant interface. AI connectivity will be configured in a later step.",
+        },
+      ]);
+    }, 500);
+  }
+
+  function renderContent() {
+    if (page === "Overview") {
+      return (
+        <>
+          <div className="welcome-row">
+            <div>
+              <div className="eyebrow">YOUR PERSONAL WORKSPACE</div>
+              <h1>Make room for <span>better.</span></h1>
+              <p className="muted">
+                One space for everything that matters.
+              </p>
+            </div>
+
+            <button
+              className="primary-btn"
+              onClick={() => setShowNote(true)}
+            >
+              + New note
+            </button>
+          </div>
+
+          <div className="hero-card">
+            <div className="hero-content">
+              <span className="pill">YOUR SPACE. YOUR RULES.</span>
+              <h2>Think clearly.<br />Create freely.</h2>
+              <p>
+                Your ideas, plans and ambitions deserve
+                a place of their own.
+              </p>
+
+              <button
+                className="light-btn"
+                onClick={() => setPage("My Notes")}
+              >
+                Explore workspace ↗
+              </button>
+            </div>
+
+            <div className="hero-orb">
+              <div className="orb-inner">CüS</div>
+            </div>
+          </div>
+
+          <div className="section-heading">
+            <div>
+              <h2>Your workspace</h2>
+              <p className="muted">A little progress, every day.</p>
+            </div>
+          </div>
+
+          <div className="stats-grid">
+            <div className="stat-card">
+              <span className="stat-icon purple">▤</span>
+              <p>YOUR NOTES</p>
+              <h3>{notes.length.toString().padStart(2, "0")}</h3>
+              <span className="stat-caption">Ideas captured</span>
+            </div>
+
+            <div className="stat-card">
+              <span className="stat-icon green">✓</span>
+              <p>COMPLETED</p>
+              <h3>
+                {tasks.filter((task) => task.done).length}
+              </h3>
+              <span className="stat-caption">Tasks finished</span>
+            </div>
+
+            <div className="stat-card">
+              <span className="stat-icon orange">✳</span>
+              <p>YOUR FOCUS</p>
+              <h3>∞</h3>
+              <span className="stat-caption">Room to grow</span>
+            </div>
+          </div>
+
+          <div className="content-grid">
+            <section className="panel">
+              <div className="panel-heading">
+                <div>
+                  <h3>Quick tasks</h3>
+                  <p>Keep moving forward.</p>
+                </div>
+                <button
+                  className="text-btn"
+                  onClick={() => setPage("Tasks")}
+                >
+                  View all ↗
+                </button>
+              </div>
+
+              <div className="task-list">
+                {tasks.slice(0, 4).map((task) => (
+                  <label className="task-item" key={task.id}>
+                    <input
+                      type="checkbox"
+                      checked={task.done}
+                      onChange={() => toggleTask(task.id)}
+                    />
+                    <span className={task.done ? "completed" : ""}>
+                      {task.text}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              <button
+                className="outline-btn full-width"
+                onClick={() => {
+                  setTasks([
+                    ...tasks,
+                    {
+                      id: Date.now(),
+                      text: "New task",
+                      done: false,
+                    },
+                  ]);
+                  notify("New task added");
+                }}
+              >
+                + Add a task
+              </button>
+            </section>
+
+            <section className="panel">
+              <div className="panel-heading">
+                <div>
+                  <h3>Recent notes</h3>
+                  <p>Your thoughts, collected.</p>
+                </div>
+                <button
+                  className="text-btn"
+                  onClick={() => setPage("My Notes")}
+                >
+                  See all ↗
+                </button>
+              </div>
+
+              {notes.slice(0, 3).map((note) => (
+                <div className="note-preview" key={note.id}>
+                  <div className="note-symbol">✎</div>
+                  <div>
+                    <strong>{note.title}</strong>
+                    <p>{note.text}</p>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                className="outline-btn full-width"
+                onClick={() => setShowNote(true)}
+              >
+                + Capture an idea
+              </button>
+            </section>
+          </div>
+        </>
+      );
+    }
+
+    if (page === "My Notes") {
+      return (
+        <>
+          <div className="page-heading">
+            <div>
+              <div className="eyebrow">YOUR THOUGHTS</div>
+              <h1>My <span>Notes.</span></h1>
+              <p className="muted">
+                Give your ideas somewhere to live.
+              </p>
+            </div>
+
+            <button
+              className="primary-btn"
+              onClick={() => setShowNote(true)}
+            >
+              + New note
+            </button>
+          </div>
+
+          <div className="notes-grid">
+            {notes.map((note) => (
+              <article className="note-card" key={note.id}>
+                <span className="pill">{note.category}</span>
+                <h3>{note.title}</h3>
+                <p>{note.text}</p>
+                <span className="note-footer">CüS JOURNAL</span>
+              </article>
+            ))}
+          </div>
+        </>
+      );
+    }
+
+    if (page === "Tasks") {
+      return (
+        <>
+          <div className="page-heading">
+            <div>
+              <div className="eyebrow">SMALL STEPS ADD UP</div>
+              <h1>Your <span>Tasks.</span></h1>
+              <p className="muted">
+                Progress over perfection.
+              </p>
+            </div>
+
+            <button
+              className="primary-btn"
+              onClick={() => {
+                setTasks([
+                  ...tasks,
+                  {
+                    id: Date.now(),
+                    text: "New task",
+                    done: false,
+                  },
+                ]);
+                notify("New task added");
+              }}
+            >
+              + Add task
+            </button>
+          </div>
+
+          <section className="panel task-page-panel">
+            {tasks.map((task) => (
+              <label className="task-item" key={task.id}>
+                <input
+                  type="checkbox"
+                  checked={task.done}
+                  onChange={() => toggleTask(task.id)}
+                />
+                <span className={task.done ? "completed" : ""}>
+                  {task.text}
+                </span>
+              </label>
+            ))}
+
+            <p className="muted task-summary">
+              {tasks.filter((task) => task.done).length}
+              {" of "}
+              {tasks.length} tasks completed
+            </p>
+          </section>
+        </>
+      );
+    }
+
+    if (page === "AI Assistant" || page === "Messages") {
+      const isAI = page === "AI Assistant";
+
+      return (
+        <>
+          <div className="page-heading">
+            <div>
+              <div className="eyebrow">
+                {isAI ? "YOUR THINKING SPACE" : "STAY CONNECTED"}
+              </div>
+              <h1>
+                {isAI ? <>AI <span>Assistant.</span></> : <>Private <span>Messages.</span></>}
+              </h1>
+              <p className="muted">
+                {isAI
+                  ? "A home for your questions and ideas."
+                  : "A dedicated space for conversations."}
+              </p>
+            </div>
+          </div>
+
+          <section className="chat-panel">
+            <div className="chat-header">
+              <div className="chat-avatar">
+                {isAI ? "✳" : "◌"}
+              </div>
+              <div>
+                <strong>{isAI ? "CüS Intelligence" : "CüS Messenger"}</strong>
+                <p>
+                  {isAI
+                    ? "AI connection not configured yet"
+                    : "Messaging setup is coming next"}
+                </p>
+              </div>
+              <span className="status-dot" />
+            </div>
+
+            <div className="chat-body">
+              {messages.length === 0 && (
+                <div className="chat-empty">
+                  <div className="chat-big-icon">
+                    {isAI ? "✳" : "◌"}
+                  </div>
+                  <h3>
+                    {isAI ? "Start with a thought." : "Your conversations start here."}
+                  </h3>
+                  <p>
+                    {isAI
+                      ? "This is the interface preview. A secure AI backend will be connected in a later step."
+                      : "The interface is ready for development. Real private messaging requires accounts and a database."}
+                  </p>
+                </div>
+              )}
+
+              {messages.map((item, index) => (
+                <div
+                  className={
+                    item.role === "You"
+                      ? "chat-message own-message"
+                      : "chat-message"
+                  }
+                  key={index}
+                >
+                  <small>{item.role}</small>
+                  <p>{item.text}</p>
+                </div>
+              ))}
+            </div>
+
+            <form className="chat-form" onSubmit={sendMessage}>
+              <input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Write something..."
+              />
+              <button className="primary-btn" type="submit">
+                Send ↗
+              </button>
+            </form>
+          </section>
+        </>
+      );
+    }
+
+    const descriptions = {
+      Calendar: "Your dates, plans and important moments.",
+      Finance: "A clearer view of your personal finances.",
+      Settings: "Your profile, preferences and privacy.",
+    };
+
+    return (
+      <>
+        <div className="page-heading">
+          <div>
+            <div className="eyebrow">YOUR PERSONAL WORKSPACE</div>
+            <h1>{page.split(" ")[0]} <span>{page.split(" ").slice(1).join(" ")}.</span></h1>
+            <p className="muted">
+              {descriptions[page] || "Your personal space."}
+            </p>
+          </div>
+        </div>
+
+        <section className="panel coming-soon">
+          <div className="chat-big-icon">✳</div>
+          <h2>Something good is taking shape.</h2>
+          <p>
+            This section will be developed in the next stages.
+          </p>
+        </section>
+      </>
+    );
+  }
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-mark">C</div>
+          <div>
+            <strong>CüS<span>.</span></strong>
+            <small>YOUR PERSONAL SPACE</small>
+          </div>
+        </div>
+
+        <div className="workspace-label">WORKSPACE</div>
+
+        <nav className="navigation">
+          {menu.map((item) => (
+            <button
+              key={item.name}
+              className={
+                page === item.name
+                  ? "nav-item active"
+                  : "nav-item"
+              }
+              onClick={() => setPage(item.name)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span>{item.name}</span>
+              {item.name === "Messages" && (
+                <span className="nav-indicator" />
+              )}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <div className="upgrade-card">
+            <div className="upgrade-icon">✧</div>
+            <strong>Room to become.</strong>
+            <p>A little more clarity, every day.</p>
+          </div>
+
+          <div className="profile-mini">
+            <div className="profile-avatar">C</div>
+            <div>
+              <strong>Your workspace</strong>
+              <small>Local preview</small>
+            </div>
+            <span>···</span>
+          </div>
+        </div>
+      </aside>
+
+      <main className="main-area">
+        <header className="topbar">
+          <div className="breadcrumb">
+            Workspace <span>/</span> <strong>{page}</strong>
+          </div>
+
+          <div className="topbar-right">
+            <span className="date-label">
+              YOUR SPACE, YOUR PACE
+            </span>
+            <div className="top-avatar">C</div>
+          </div>
+        </header>
+
+        <div className="page-content">
+          {renderContent()}
+
+          <footer className="footer">
+            <span>© 2026 CüS</span>
+            <span>STYLE YOUR LIFE. SHAPE YOUR WORLD.</span>
+          </footer>
+        </div>
+      </main>
+
+      {showNote && (
+        <div
+          className="modal-backdrop"
+          onClick={() => setShowNote(false)}
+        >
+          <form
+            className="note-modal"
+            onSubmit={addNote}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setShowNote(false)}
+            >
+              ×
+            </button>
+
+            <div className="eyebrow">CAPTURE THE THOUGHT</div>
+            <h2>Create a <span>note.</span></h2>
+
+            <label>Title</label>
+            <input
+              value={noteTitle}
+              onChange={(e) => setNoteTitle(e.target.value)}
+              placeholder="Give your idea a name"
+              required
+            />
+
+            <label>Your thoughts</label>
+            <textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Start writing..."
+              rows="5"
+            />
+
+            <button className="primary-btn full-width" type="submit">
+              Save note ↗
+            </button>
+          </form>
+        </div>
+      )}
+
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+export default App;
           
